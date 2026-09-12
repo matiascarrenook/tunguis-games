@@ -1,4 +1,6 @@
-const VERSION = "tunguis-v14";
+const VERSION = "tunguis-v15";
+const CACHE_CDN = "tunguis-cdn";
+const CACHE_ROM = "tunguis-roms";
 const SHELL = [
   "./",
   "./index.html",
@@ -35,12 +37,28 @@ self.addEventListener("install", (e) => {
 
 self.addEventListener("activate", (e) => {
   e.waitUntil(
-    caches
-      .keys()
-      .then((keys) =>
-        Promise.all(keys.filter((k) => k !== VERSION).map((k) => caches.delete(k)))
-      )
-      .then(() => self.clients.claim())
+    (async () => {
+      const keys = await caches.keys();
+      const viejos = keys.filter((k) => k.startsWith("tunguis-v") && k !== VERSION);
+      for (const k of viejos) {
+        const old = await caches.open(k);
+        try {
+          const reqs = await old.keys();
+          for (const rq of reqs) {
+            const url = new URL(rq.url);
+            const res = await old.match(rq).catch(() => null);
+            if (!res) continue;
+            if (url.hostname === "cdn.emulatorjs.org") {
+              (await caches.open(CACHE_CDN)).put(rq, res);
+            } else if (url.pathname.includes("/roms/")) {
+              (await caches.open(CACHE_ROM)).put(rq, res);
+            }
+          }
+        } catch (err) {}
+        await caches.delete(k);
+      }
+      await self.clients.claim();
+    })()
   );
 });
 
@@ -48,8 +66,8 @@ self.addEventListener("message", (e) => {
   const d = e.data;
   if (!d || d.action !== "cacheUrl") return;
   e.waitUntil(
-    caches.open(VERSION).then((c) =>
-      caches.match(d.url).then((yaCacheado) => {
+    caches.open(CACHE_ROM).then((c) =>
+      c.match(d.url).then((yaCacheado) => {
         if (yaCacheado) return;
         const cross = new URL(d.url, location.href).origin !== location.origin;
         return fetch(d.url, { mode: cross ? "no-cors" : "cors", credentials: "same-origin" })
@@ -77,12 +95,17 @@ self.addEventListener("fetch", (e) => {
 
   if (url.origin !== location.origin) {
     e.respondWith(
-      caches.match(req).then(
-        (cached) =>
-          cached ||
-          fetch(req)
-            .then(guardar)
-            .catch(() => cached)
+      caches.open(CACHE_CDN).then((c) =>
+        c.match(req).then(
+          (cached) =>
+            cached ||
+            fetch(req)
+              .then((res) => {
+                if (res && res.ok) c.put(req, res.clone());
+                return res;
+              })
+              .catch(() => cached)
+        )
       )
     );
     return;
@@ -90,7 +113,16 @@ self.addEventListener("fetch", (e) => {
 
   if (url.pathname.includes("/roms/")) {
     e.respondWith(
-      caches.match(req).then((c) => c || fetch(req).then(guardar))
+      caches.open(CACHE_ROM).then((c) =>
+        c.match(req).then(
+          (m) =>
+            m ||
+            fetch(req).then((res) => {
+              if (res && res.ok) c.put(req, res.clone());
+              return res;
+            })
+        )
+      )
     );
     return;
   }
