@@ -1,4 +1,4 @@
-const VERSION = "tunguis-v10";
+const VERSION = "tunguis-v11";
 const SHELL = [
   "./",
   "./index.html",
@@ -19,6 +19,7 @@ const SHELL = [
   "./img/emerald.svg",
   "./img/ruby.png",
   "./img/sapphire.png",
+  "./favicon.png",
   "./favicon.svg"
 ];
 
