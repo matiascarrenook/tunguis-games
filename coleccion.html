@@ -144,6 +144,7 @@
     box-shadow: 0 12px 40px rgba(0,0,0,.5);
   }
   h3 { text-transform: uppercase; letter-spacing: 1px; color: #c41e26; margin-bottom: 6px; }
+  .btn.mini { margin-top: 8px; padding: 9px 12px; font-size: .75rem; margin-right: 6px; }
 </style>
 </head>
 <body>
@@ -161,7 +162,7 @@
 
   <div class="card">
     <h3>Recibir un Pokémon</h3>
-    <p style="font-size:.9rem;color:#6a6a80;line-height:1.5">Pegá el cartón que te pasaron para recibir ese Pokémon en una de tus partidas.</p>
+    <p style="font-size:.9rem;color:#6a6a80;line-height:1.5">Pegá el cartón que te pasaron para <b>guardarlo directo en tu colección</b> o entregarlo dentro de una partida.</p>
     <div class="inputzona">
       <input id="cartonIn" type="text" placeholder="ej: MEWX-K3L9-QZTN-2F8R" autocomplete="off" autocapitalize="off" spellcheck="false">
       <button class="btn rojo" id="btnRecibir">Recibir Pokémon</button>
@@ -269,13 +270,29 @@
       msj.hidden = false;
       return;
     }
-    if (!tieneCodigos(valido.s)) {
-      msj.textContent = "✗ " + valido.s.toUpperCase() + " todavía no tiene códigos de inyección configurados (cheats.js).";
-      msj.className = "msj err";
-      msj.hidden = false;
-      return;
-    }
-    location.href = "distribuir.html?pokemon=" + encodeURIComponent(valido.s);
+    var s = valido.s;
+    msj.className = "msj ok";
+    msj.innerHTML =
+      "Cartón de <b>" + s.toUpperCase() + "</b> validado.<br>" +
+      '<button class="btn amarillo mini" id="opDirecto">Sumar a mi colección</button>' +
+      (tieneCodigos(s) ? '<button class="btn rojo mini" id="opPartida">Entregarlo en una partida</button>' : '');
+    msj.hidden = false;
+
+    $("opDirecto").onclick = function () {
+      if (!agregarPokemon(s, "cartón")) {
+        msj.className = "msj err";
+        msj.textContent = "✗ No se pudo guardar (memoria llena).";
+        return;
+      }
+      $("cartonIn").value = "";
+      pintar();
+      msj.className = "msj ok";
+      msj.textContent = "✓ " + s.toUpperCase() + " guardado en tu colección.";
+    };
+    var opP = $("opPartida");
+    if (opP) opP.onclick = function () {
+      location.href = "distribuir.html?pokemon=" + encodeURIComponent(s);
+    };
   };
 
   pintar();
