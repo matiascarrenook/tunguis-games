@@ -67,7 +67,7 @@
     box-shadow: 0 2px 0 rgba(0,0,0,.4);
   }
   header .logoWrap .logo { height: 100%; max-width: 30vw; object-fit: contain; }
-  #btnDescarga {
+  #btnInstalar {
     flex: none;
     background: #e8382f;
     color: #fff;
@@ -80,8 +80,10 @@
     box-shadow: 0 2px 0 rgba(0,0,0,.4);
     display: none;
     -webkit-tap-highlight-color: transparent;
+    white-space: nowrap;
   }
-  #btnDescarga:active { filter: brightness(1.2); }
+  #btnInstalar:active { filter: brightness(1.2); }
+  #btnInstalar.ok { background: #227a4b; }
   .aviso {
     margin: 8px auto -8px;
     max-width: 640px;
@@ -128,7 +130,7 @@
   <a class="back" href="index.html">← Juegos</a>
   <span class="logoWrap" id="logoWrap" hidden><img class="logo" id="logo" alt=""></span>
   <div class="titulo"><span class="dot" id="dot"></span><span id="titulo">Cargando…</span></div>
-  <button id="btnDescarga">⬇ Descargar</button>
+  <button id="btnInstalar">📲 App Tunguis Games</button>
 </header>
 <div class="aviso" id="aviso" hidden></div>
 <div class="contenedor">
@@ -226,17 +228,6 @@
       const blob = new Blob([claro], { type: "application/octet-stream" });
       window.EJS_gameUrl = URL.createObjectURL(blob);
 
-      const btn = $("btnDescarga");
-      btn.style.display = "inline-block";
-      btn.onclick = function () {
-        const a = document.createElement("a");
-        a.href = URL.createObjectURL(new Blob([claro]));
-        a.download = game.descarga || (game.file.replace(/\.enc$/, ""));
-        document.body.appendChild(a);
-        a.click();
-        a.remove();
-      };
-
       const s = document.createElement("script");
       s.src = "https://cdn.emulatorjs.org/stable/data/loader.js";
       document.head.appendChild(s);
@@ -254,5 +245,6 @@
     });
   }
 </script>
+<script src="instalar.js"></script>
 </body>
 </html>

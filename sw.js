@@ -1,4 +1,4 @@
-const VERSION = "tunguis-v2";
+const VERSION = "tunguis-v3";
 const SHELL = [
   "./",
   "./index.html",
@@ -6,6 +6,7 @@ const SHELL = [
   "./distribuir.html",
   "./config.js",
   "./cheats.js",
+  "./instalar.js",
   "./manifest.webmanifest",
   "./icons/icon-192.png",
   "./icons/icon-512.png",

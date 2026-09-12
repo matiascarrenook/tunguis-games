@@ -180,6 +180,53 @@
   }
   .llave button:active { transform: translateY(3px); box-shadow: 0 2px 0 #e08f00; }
 
+  .instalar {
+    margin-top: 16px;
+    background: linear-gradient(180deg, #24243d, #161629);
+    border: 3px solid var(--ink);
+    border-radius: 18px;
+    padding: 16px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    box-shadow: 0 7px 0 rgba(26,26,46,.25);
+  }
+  .instalar .miniLogo {
+    width: 52px; height: 52px;
+    border-radius: 12px;
+    flex: none;
+    box-shadow: 0 3px 0 rgba(0,0,0,.35);
+    background-image: url("icons/icon-192.png");
+    background-size: cover;
+    background-position: center;
+  }
+  .instalar .txt { flex: 1; min-width: 0; }
+  .instalar .txt b {
+    color: var(--yellow);
+    font-size: clamp(.95rem, 4vw, 1.05rem);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+  .instalar .txt p { color: #b8b8cc; font-size: .82rem; line-height: 1.4; margin-top: 3px; }
+  #btnInstalar {
+    flex: none;
+    background: linear-gradient(180deg, #ffd84d, #ffb300);
+    color: #6b3d00;
+    border: none;
+    border-radius: 999px;
+    padding: 12px 16px;
+    font-weight: 900;
+    font-size: .85rem;
+    cursor: pointer;
+    box-shadow: 0 4px 0 #d1a000;
+    text-transform: uppercase;
+    letter-spacing: .5px;
+    display: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+  #btnInstalar:active { transform: translateY(2px); box-shadow: 0 2px 0 #d1a000; }
+  #btnInstalar.ok { background: linear-gradient(180deg, #4ade80, #22a55b); color: #07301c; box-shadow: 0 4px 0 #147a43; }
+
   .titulo-seccion {
     display: flex;
     align-items: center;
@@ -318,6 +365,15 @@
     <p>Acercá tu llavero al celular.<br><b>Su llave desbloquea solo tu cartucho.</b></p>
   </div>
 
+  <div class="instalar">
+    <div class="miniLogo"></div>
+    <div class="txt">
+      <b>App Tunguis Games</b>
+      <p>Instalá la app y jugá sin internet. El emulador y cada juego quedan guardados en tu teléfono.</p>
+    </div>
+    <button id="btnInstalar">Instalar</button>
+  </div>
+
   <section class="llave">
     <h3>Ingresá tu llave manualmente</h3>
     <input id="llave" type="text" placeholder="pegá acá tu llave…" autocomplete="off" autocapitalize="off" spellcheck="false">
@@ -405,5 +461,6 @@
     });
   }
 </script>
+<script src="instalar.js"></script>
 </body>
 </html>
