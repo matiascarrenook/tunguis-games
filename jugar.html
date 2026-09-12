@@ -199,6 +199,13 @@
     return b;
   }
 
+  function swListo() {
+    if (!("serviceWorker" in navigator)) return Promise.resolve();
+    return navigator.serviceWorker.ready
+      .then(function () { return new Promise(function (r) { setTimeout(r, 300); }); })
+      .catch(function () {});
+  }
+
   async function descifrar() {
     const res = await fetch("roms/" + encodeURIComponent(game.file));
     if (!res.ok) throw new Error("No se pudo descargar la ROM cifrada");
@@ -223,6 +230,7 @@
   configurarCheats();
 
   (async function () {
+    await swListo();
     try {
       const claro = await descifrar();
       const blob = new Blob([claro], { type: "application/octet-stream" });
