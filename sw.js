@@ -1,4 +1,4 @@
-const VERSION = "tunguis-v9";
+const VERSION = "tunguis-v10";
 const SHELL = [
   "./",
   "./index.html",
@@ -12,6 +12,7 @@ const SHELL = [
   "./manifest.webmanifest",
   "./icons/icon-192.png",
   "./icons/icon-512.png",
+  "./icons/icon-maskable-512.png",
   "./apple-touch-icon.png",
   "./img/firered.svg",
   "./img/leafgreen.svg",
