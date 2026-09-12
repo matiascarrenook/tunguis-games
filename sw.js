@@ -1,4 +1,4 @@
-const VERSION = "tunguis-v19";
+const VERSION = "tunguis-v20";
 const CACHE_CDN = "tunguis-cdn";
 const CACHE_ROM = "tunguis-roms";
 const SHELL = [
