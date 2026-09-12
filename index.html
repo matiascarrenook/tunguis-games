@@ -267,6 +267,26 @@
     font-weight: 700;
     margin: -6px 0 14px;
   }
+  .pc {
+    margin-top: 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: #fff;
+    border: 3px solid var(--ink);
+    border-radius: 18px;
+    padding: 14px;
+    text-decoration: none;
+    color: inherit;
+    box-shadow: 0 6px 0 rgba(26,26,46,.16);
+    -webkit-tap-highlight-color: transparent;
+  }
+  .pc:active { transform: translateY(3px); box-shadow: 0 3px 0 rgba(26,26,46,.16); }
+  .pc-ico { font-size: 1.8rem; flex: none; }
+  .pc-txt { flex: 1; min-width: 0; }
+  .pc-txt b { display: block; font-size: 1rem; text-transform: uppercase; letter-spacing: 1px; color: var(--darkred); }
+  .pc-txt small { color: #6a6a80; font-weight: 700; font-size: .8rem; }
+  .pc-go { font-weight: 900; color: var(--yellow); font-size: 1.2rem; -webkit-text-stroke: 1px var(--ink); }
 
   .grid {
     display: grid;
@@ -440,6 +460,15 @@
   <div class="como" id="sindatos">
     <p id="sinPokemons">Sin Pokémon disponibles todavía.</p>
   </div>
+
+  <a class="pc" href="coleccion.html">
+    <span class="pc-ico">🎒</span>
+    <span class="pc-txt">
+      <b>Mi PC · Colección</b>
+      <small>Ranking, puntos y cartones de intercambio</small>
+    </span>
+    <span class="pc-go">→</span>
+  </a>
 
   <div class="como">
     <h3>¿Cómo funciona?</h3>

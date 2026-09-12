@@ -132,6 +132,9 @@
       '<p class="sin"><b>No se detectaron partidas guardadas.</b><br>' +
       'Jugá una vez al menos con tu llavero de cartucho y volvé a intentar.</p>' +
       '<a class="btn" href="index.html">Ver cartuchos</a>';
+    try {
+      localStorage.setItem("tunguis_pendiente_global", pokemon);
+    } catch (e) {}
   }
 
   contenido.innerHTML = html;

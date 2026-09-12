@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#e8382f">
+<meta name="description" content="Tu colección de Pokémon: puntos, ranking y cartones de intercambio.">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="favicon.svg">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<title>Mi PC · Tunguis Games</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: "Trebuchet MS", Verdana, system-ui, sans-serif;
+    color: #1a1a2e;
+    min-height: 100vh;
+    background:
+      radial-gradient(circle at 14% 16%, rgba(255,255,255,.6), transparent 38%),
+      radial-gradient(circle at 86% 84%, rgba(255,255,255,.4), transparent 42%),
+      linear-gradient(160deg, #ffd9c2 0%, #ffe9e0 35%, #cfe2ff 100%);
+    background-attachment: fixed;
+    padding: 16px 12px max(24px, env(safe-area-inset-bottom));
+  }
+  .wrap { max-width: 640px; margin: 0 auto; width: 100%; }
+  a.back {
+    display: block;
+    margin-bottom: 12px;
+    text-decoration: none;
+    color: #7a4900;
+    font-weight: 800;
+  }
+  .card {
+    background: #fff;
+    border: 3px solid #1a1a2e;
+    border-radius: 18px;
+    padding: 16px;
+    box-shadow: 0 7px 0 rgba(26,26,46,.16);
+    margin-bottom: 14px;
+  }
+  h1 { text-transform: uppercase; letter-spacing: 2px; font-size: 1.25rem; }
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+    margin-top: 12px;
+  }
+  .stat {
+    background: linear-gradient(180deg, #23233c, #15152a);
+    border-radius: 14px;
+    color: #fff;
+    padding: 12px;
+    text-align: center;
+  }
+  .stat b { font-size: 1.6rem; color: #ffd84d; }
+  .stat span { display: block; font-size: .72rem; text-transform: uppercase; letter-spacing: 1px; color: #b8b8cc; margin-top: 4px; }
+  .monitores { margin-top: 12px; font-size: .9rem; line-height: 1.6; }
+  .monitores b { color: #c41e26; }
+  .inputzona input {
+    width: 100%;
+    min-height: 48px;
+    margin-top: 12px;
+    padding: 12px 14px;
+    border-radius: 10px;
+    border: 3px solid #ffb300;
+    background: #0e0e1c;
+    color: #fff;
+    font-family: Consolas, ui-monospace, monospace;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    font-size: .9rem;
+  }
+  .inputzona input::placeholder { color: #5a5a78; text-transform: none; }
+  .btn {
+    display: inline-block;
+    margin-top: 10px;
+    border: none;
+    border-radius: 12px;
+    padding: 12px 18px;
+    font-family: inherit;
+    font-weight: 900;
+    font-size: .9rem;
+    cursor: pointer;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    -webkit-tap-highlight-color: transparent;
+    text-decoration: none;
+    color: #fff;
+  }
+  .btn.amarillo { background: linear-gradient(180deg, #ffd84d, #ffb300); color: #6b3d00; box-shadow: 0 4px 0 #d1a000; }
+  .btn.rojo { background: linear-gradient(180deg, #f64f45, #e0201f); box-shadow: 0 4px 0 #a51515; }
+  .btn:active { transform: translateY(2px); box-shadow: 0 2px 0 rgba(0,0,0,.2); }
+  .msj { margin-top: 10px; font-size: .88rem; font-weight: 700; line-height: 1.45; }
+  .msj.ok { color: #187a43; }
+  .msj.err { color: #c41e26; }
+  .vacio { text-align: center; color: #6a6a80; padding: 18px 6px; line-height: 1.6; font-size: .95rem; }
+  .grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin-top: 10px; }
+  .entrada {
+    background: #fff;
+    border: 3px solid #1a1a2e;
+    border-radius: 14px;
+    padding: 10px;
+    text-align: center;
+    box-shadow: 0 4px 0 rgba(26,26,46,.15);
+  }
+  .entrada .mon { width: 42px; height: 42px; margin: 0 auto 6px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 900; color: #fff; font-size: 1.1rem; border: 2px solid rgba(0,0,0,.3); background: #e0201f; }
+  .entrada b { display: block; text-transform: uppercase; font-size: .95rem; }
+  .entrada small { color: #9a9aa8; font-weight: 700; font-size: .72rem; }
+  .entrada .pts { display: inline-block; margin-top: 6px; background: #ffe9b0; color: #8a5a00; font-weight: 900; border-radius: 999px; padding: 3px 9px; font-size: .72rem; }
+  .carton { text-align: center; }
+  .carton .codigo {
+    margin: 12px auto;
+    font-family: Consolas, ui-monospace, monospace;
+    font-size: 1.05rem;
+    letter-spacing: 1px;
+    background: #0e0e1c;
+    color: #7df0b0;
+    border: 2px dashed #227a4b;
+    border-radius: 12px;
+    padding: 12px;
+    word-break: break-all;
+    user-select: all;
+  }
+  .modal-bg {
+    position: fixed; inset: 0;
+    background: rgba(13,13,22,.78);
+    display: none;
+    align-items: center; justify-content: center;
+    padding: 20px;
+    z-index: 50;
+  }
+  .modal-bg.abierto { display: flex; }
+  .modal {
+    background: #fff;
+    border: 3px solid #1a1a2e;
+    border-radius: 18px;
+    max-width: 420px;
+    width: 100%;
+    padding: 18px;
+    max-height: 86vh;
+    overflow: auto;
+    box-shadow: 0 12px 40px rgba(0,0,0,.5);
+  }
+  h3 { text-transform: uppercase; letter-spacing: 1px; color: #c41e26; margin-bottom: 6px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <a class="back" href="index.html">← Juegos</a>
+
+  <div class="card">
+    <h1>🎒 Mi PC</h1>
+    <div class="stats">
+      <div class="stat"><b id="total">0</b><span>Pokémon</span></div>
+      <div class="stat"><b id="pts">0</b><span>Puntos</span></div>
+    </div>
+    <div class="monitores" id="monitores"></div>
+  </div>
+
+  <div class="card">
+    <h3>Recibir un Pokémon</h3>
+    <p style="font-size:.9rem;color:#6a6a80;line-height:1.5">Pegá el cartón que te pasaron para recibir ese Pokémon en una de tus partidas.</p>
+    <div class="inputzona">
+      <input id="cartonIn" type="text" placeholder="ej: MEWX-K3L9-QZTN-2F8R" autocomplete="off" autocapitalize="off" spellcheck="false">
+      <button class="btn rojo" id="btnRecibir">Recibir Pokémon</button>
+      <div class="msj" id="msjRecibir" hidden></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>Tu colección</h3>
+    <div id="lista"></div>
+  </div>
+
+  <div class="modal-bg" id="modal">
+    <div class="modal carton">
+      <h3>Cartón de intercambio</h3>
+      <p style="font-size:.85rem;color:#6a6a80">Pasá este código para regalar/intercambiar tu Pokémon.</p>
+      <div class="codigo" id="codigoCarton"></div>
+      <button class="btn amarillo" id="btnCopiar" style="margin-right:6px">Copiar</button>
+      <button class="btn amarillo" id="btnWhats">Compartir por WhatsApp</button>
+      <div class="msj" id="msjCarton" style="text-align:center"></div>
+      <button class="btn rojo" id="btnCerrar" style="width:100%;margin-top:14px">Cerrar</button>
+    </div>
+  </div>
+</div>
+
+<script src="config.js"></script>
+<script src="cheats.js"></script>
+<script src="pokedex.js"></script>
+<script>
+(function () {
+  var $ = function (id) { return document.getElementById(id); };
+  var lista = $("lista");
+
+  function pintar() {
+    var arr = listaColeccion();
+    $("total").textContent = arr.length;
+    var pts = 0;
+    arr.forEach(function (e) { pts += puntosDe(e.s); });
+    $("pts").textContent = pts;
+
+    var porEspecie = {};
+    arr.forEach(function (e) {
+      if (!porEspecie[e.s]) porEspecie[e.s] = { n: 0, juegos: {}, f: e.f };
+      porEspecie[e.s].n++;
+      porEspecie[e.s].juegos[e.g] = 1;
+    });
+
+    var especiess = Object.keys(porEspecie);
+    especiess.sort(function (a, b) { return puntosDe(b) - puntosDe(a); });
+    var top = especiess.slice(0, 3).map(function (s) {
+      return s.toUpperCase() + " (" + puntosDe(s) + " pts)";
+    });
+    $("monitores").textContent = top.length ? "Top de tu colección: " + top.join(" · ") : "";
+
+    lista.innerHTML = "";
+    if (!especiess.length) {
+      lista.innerHTML = '<div class="vacio">Todavía no recibiste Pokémon.<br>Jugá y obtenelos con tus llaveros.<br>«Recibir Pokémon» con un cartón, aquí.</div>';
+      return;
+    }
+    especiess.forEach(function (s, idx) {
+      var e = porEspecie[s];
+      var colores = ["#e0201f", "#2e9e4f", "#2860c0", "#c2185b", "#0fa573", "#8e44ad"];
+      var div = document.createElement("div");
+      div.className = "entrada";
+      div.innerHTML =
+        '<div class="mon" style="background:' + colores[idx % colores.length] + '">' + s.charAt(0).toUpperCase() + '</div>' +
+        '<b>' + s.toUpperCase() + '</b>' +
+        '<small>' + rarezaDe(s) + ' · x' + e.n + '</small><br>' +
+        '<span class="pts">' + puntosDe(s) + ' pts</span><br>' +
+        '<button class="btn amarillo" data-s="' + s + '" style="margin-top:8px;padding:8px 12px;font-size:.75rem">Otorgar cartón</button>';
+      lista.appendChild(div);
+    });
+
+    lista.querySelectorAll("[data-s]").forEach(function (b) {
+      b.addEventListener("click", function () { otorgar(b.getAttribute("data-s")); });
+    });
+  }
+
+  function otorgar(specie) {
+    var res = generarCarton(specie);
+    $("codigoCarton").textContent = res.codigo;
+    $("modal").classList.add("abierto");
+    $("msjCarton").textContent = "";
+
+    $("btnCopiar").onclick = function () {
+      navigator.clipboard && navigator.clipboard.writeText(res.codigo).then(function () {
+        $("msjCarton").textContent = "✓ Copiado";
+      }).catch(function () { $("msjCarton").textContent = "Mantené el dedo en el código para copiarlo"; });
+    };
+    $("btnWhats").onclick = function () {
+      var txt = "Te comparto un Pokémon de Tunguis Games 🎁 " + specie.toUpperCase() + "\nCódigo: " + res.codigo;
+      window.open("https://wa.me/?text=" + encodeURIComponent(txt), "_blank");
+    };
+  }
+
+  $("btnCerrar").onclick = function () { $("modal").classList.remove("abierto"); };
+
+  $("btnRecibir").onclick = function () {
+    var msj = $("msjRecibir");
+    msj.hidden = true;
+    var valido = validarCarton($("cartonIn").value);
+    if (!valido) {
+      msj.textContent = "✗ Ese cartón no es válido. Revisá que esté completo.";
+      msj.className = "msj err";
+      msj.hidden = false;
+      return;
+    }
+    if (!tieneCodigos(valido.s)) {
+      msj.textContent = "✗ " + valido.s.toUpperCase() + " todavía no tiene códigos de inyección configurados (cheats.js).";
+      msj.className = "msj err";
+      msj.hidden = false;
+      return;
+    }
+    location.href = "distribuir.html?pokemon=" + encodeURIComponent(valido.s);
+  };
+
+  pintar();
+})();
+</script>
+<script>
+  if ("serviceWorker" in navigator) {
+    window.addEventListener("load", function () {
+      navigator.serviceWorker.register("sw.js").catch(function () {});
+    });
+  }
+</script>
+</body>
+</html>
