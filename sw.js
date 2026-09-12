@@ -1,10 +1,11 @@
-const VERSION = "tunguis-v12";
+const VERSION = "tunguis-v13";
 const SHELL = [
   "./",
   "./index.html",
   "./jugar.html",
   "./distribuir.html",
   "./coleccion.html",
+  "./como-funciona.html",
   "./config.js",
   "./cheats.js",
   "./pokedex.js",

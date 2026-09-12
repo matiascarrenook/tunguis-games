@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#e8382f">
+<meta name="description" content="Cómo funciona Tunguis Games: llaveros NFC, partidas guardadas, colección y cartones de intercambio.">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="favicon.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<title>Cómo funciona · Tunguis Games</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: "Trebuchet MS", Verdana, system-ui, sans-serif;
+    color: #1a1a2e;
+    min-height: 100vh;
+    background:
+      radial-gradient(circle at 14% 16%, rgba(255,255,255,.6), transparent 38%),
+      radial-gradient(circle at 86% 84%, rgba(255,255,255,.4), transparent 42%),
+      linear-gradient(160deg, #ffd9c2 0%, #ffe9e0 35%, #cfe2ff 100%);
+    background-attachment: fixed;
+    padding: 16px 12px max(24px, env(safe-area-inset-bottom));
+  }
+  .wrap { max-width: 640px; margin: 0 auto; width: 100%; }
+  a.back {
+    display: block;
+    margin-bottom: 12px;
+    text-decoration: none;
+    color: #7a4900;
+    font-weight: 800;
+  }
+  .card {
+    background: #fff;
+    border: 3px solid #1a1a2e;
+    border-radius: 18px;
+    padding: 16px;
+    box-shadow: 0 7px 0 rgba(26,26,46,.16);
+    margin-bottom: 14px;
+  }
+  h1 { text-transform: uppercase; letter-spacing: 2px; font-size: 1.3rem; color: #c41e26; }
+  .card > p.sub { margin-top: 6px; font-size: .9rem; color: #6a6a80; line-height: 1.5; }
+  .paso { display: flex; gap: 12px; align-items: flex-start; }
+  .num {
+    flex: none;
+    width: 34px; height: 34px;
+    border-radius: 50%;
+    background: linear-gradient(180deg, #f23b30, #c41e26);
+    color: #fff;
+    font-weight: 900;
+    font-size: 1.05rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 3px 0 #8f1018;
+    margin-top: 2px;
+  }
+  .paso h3 {
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-size: .95rem;
+    color: #1a1a2e;
+  }
+  .paso p { font-size: .88rem; color: #5a5a70; line-height: 1.5; margin-top: 3px; }
+  .paso p b { color: #c41e26; }
+  .nota {
+    background: #fffbe6;
+    border: 2px dashed #e0a800;
+    border-radius: 14px;
+    padding: 12px 14px;
+    font-size: .85rem;
+    line-height: 1.5;
+    color: #6b5a1e;
+    margin-bottom: 14px;
+  }
+  footer { text-align: center; color: #6a6a80; font-size: .8rem; font-weight: 700; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <a class="back" href="index.html">← Juegos</a>
+
+  <div class="card">
+    <h1>¿Cómo funciona?</h1>
+    <p class="sub">Jugá Pokémon GBA guardando todo automáticamente en tu teléfono.</p>
+  </div>
+
+  <div class="card">
+    <div class="paso">
+      <div class="num">1</div>
+      <div>
+        <h3>Tu llavero es la llave</h3>
+        <p>Cada llavero tiene un <b>tag NFC</b> con la llave única de su juego. Acercalo al celular y se abre la página sola, desbloqueando <b>solo ese cartucho</b>.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="paso">
+      <div class="num">2</div>
+      <div>
+        <h3>Partida guardada sola</h3>
+        <p>Mientras jugás, la partida se guarda <b>automáticamente cada pocos segundos</b>. Cada vez que volvés a tocar el llavero, continuás justo donde estabas.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="paso">
+      <div class="num">3</div>
+      <div>
+        <h3>Mi PC · Colección</h3>
+        <p>Guardás los Pokémon que encontrás y suman <b>puntos según su rareza</b>. En "Mi PC" ves tu colección, tu ranking y los Pokémon especiales.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="paso">
+      <div class="num">4</div>
+      <div>
+        <h3>Cartones de intercambio</h3>
+        <p>Todo Pokémon genera un <b>cartón</b> para regalar o intercambiar. Quien lo recibe lo pega en "Mi PC" y puede <b>sumarlo directo a su colección</b> o recibirlo dentro de una partida.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="paso">
+      <div class="num">5</div>
+      <div>
+        <h3>Jugá sin internet</h3>
+        <p>Tocando <b>Instalar app</b> guardás Tunguis Games en tu teléfono: el emulador y cada juego quedan guardados y podés jugar <b>sin conexión</b>.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="nota">
+    🔒 <b>Tus partidas y tu colección viven solo en tu teléfono.</b> Cada dispositivo tiene las suyas: son tuyas y no se comparten entre usuarios.
+  </div>
+
+  <footer>Acordate de usar siempre la misma URL para que tus partidas te sigan.</footer>
+</div>
+<script>
+  if ("serviceWorker" in navigator) {
+    window.addEventListener("load", function () {
+      navigator.serviceWorker.register("sw.js").catch(function () {});
+    });
+  }
+</script>
+</body>
+</html>

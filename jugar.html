@@ -84,6 +84,21 @@
   }
   #btnInstalar:active { filter: brightness(1.2); }
   #btnInstalar.ok { background: #227a4b; }
+  header .btnResp {
+    flex: none;
+    background: #26263a;
+    color: #e9e9f0;
+    border: 1px solid #3a3a52;
+    border-radius: 8px;
+    padding: 7px 10px;
+    font-size: .8rem;
+    font-weight: 700;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    white-space: nowrap;
+    display: none;
+  }
+  header .btnResp:active { background: #3a3a52; }
   .aviso {
     margin: 8px auto -8px;
     max-width: 640px;
@@ -130,8 +145,11 @@
   <a class="back" href="index.html">← Juegos</a>
   <span class="logoWrap" id="logoWrap" hidden><img class="logo" id="logo" alt=""></span>
   <div class="titulo"><span class="dot" id="dot"></span><span id="titulo">Cargando…</span></div>
+  <button class="btnResp" id="btnGuardar" title="Guardar partida en un archivo">💾</button>
+  <button class="btnResp" id="btnCargar" title="Cargar partida desde un archivo">📂</button>
   <button id="btnInstalar">📲 App Tunguis Games</button>
 </header>
+<input type="file" id="archivoPartida" accept=".state,.sav,application/octet-stream" hidden>
 <div class="aviso" id="aviso" hidden></div>
 <div class="contenedor">
   <div id="game"></div>
@@ -199,6 +217,7 @@
     }
     activarCheatsAuto();
     iniciarAutoGuardado();
+    prepararRespaldos();
     if (params.get("fresh") === "1") borrarEstado();
     else intentarRestaurarPartida();
     mostrarAviso("✓ Guardado: podés jugar este juego sin internet.");
@@ -283,6 +302,61 @@
       if (emu && typeof emu.getBaseFileName === "function") return emu.getBaseFileName();
     } catch (e) {}
     return (game.nombre || "juego");
+  }
+
+  function bajarArchivo(nombre, blob) {
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = nombre;
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 4000);
+  }
+
+  function guardarPartidaArchivo() {
+    try {
+      const emu = window.EJS_emulator;
+      const s = emu && emu.gameManager && emu.gameManager.getState();
+      if (!s) { mostrarAviso("Todavía no hay partida para guardar.", true); return; }
+      const nombre = (game.nombre || "partida").replace(/[^\w\sáéíóúÁÉÍÓÚñÑ-]+/g, "").trim() + ".state";
+      bajarArchivo("tunguis-" + nombre, new Blob([s], { type: "application/octet-stream" }));
+      mostrarAviso("💾 Archivo de partida guardado. Guardalo en WhatsApp, Drive o nube.");
+    } catch (e) {
+      mostrarAviso("No se pudo guardar el archivo.", true);
+    }
+  }
+
+  function cargarPartidaArchivo() {
+    const input = $("archivoPartida");
+    input.onchange = async function () {
+      const file = input.files && input.files[0];
+      input.value = "";
+      if (!file) return;
+      try {
+        const u8 = new Uint8Array(await file.arrayBuffer());
+        const emu = window.EJS_emulator;
+        let intentos = 0;
+        (function reintentar() {
+          try {
+            emu.gameManager.loadState(u8);
+            mostrarAviso("✓ Partida cargada desde el archivo.");
+          } catch (e) {
+            if (++intentos < 6) setTimeout(reintentar, 600);
+            else mostrarAviso("No se pudo cargar esa partida.", true);
+          }
+        })();
+      } catch (e) {
+        mostrarAviso("No se pudo leer el archivo.", true);
+      }
+    };
+    input.click();
+  }
+
+  function prepararRespaldos() {
+    $("btnGuardar").hidden = false;
+    $("btnCargar").hidden = false;
+    $("btnGuardar").onclick = guardarPartidaArchivo;
+    $("btnCargar").onclick = cargarPartidaArchivo;
   }
 
   function borrarEstado() {

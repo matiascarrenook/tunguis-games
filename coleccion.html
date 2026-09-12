@@ -171,6 +171,15 @@
   </div>
 
   <div class="card">
+    <h3>Respaldo de tus datos</h3>
+    <p style="font-size:.9rem;color:#6a6a80;line-height:1.5">Exportá tu colección a un archivo y guardalo donde quieras (WhatsApp, Drive, nube). Si cambiás de teléfono o perdés los datos, restaurás con ese archivo.</p>
+    <button class="btn amarillo mini" id="btnExportar">Guardar respaldo</button>
+    <button class="btn rojo mini" id="btnImportar">Restaurar respaldo</button>
+    <input type="file" id="archivoRespaldo" accept=".json,application/json" hidden>
+    <div class="msj" id="msjRespaldo" hidden></div>
+  </div>
+
+  <div class="card">
     <h3>Tu colección</h3>
     <div id="lista"></div>
   </div>
@@ -259,6 +268,74 @@
   }
 
   $("btnCerrar").onclick = function () { $("modal").classList.remove("abierto"); };
+
+  function bajarArchivo(nombre, blob) {
+    var a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = nombre;
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 4000);
+  }
+
+  $("btnExportar").onclick = function () {
+    var msj = $("msjRespaldo");
+    msj.hidden = true;
+    var coleccion = listaColeccion();
+    var resguardo = {
+      v: 1,
+      tipo: "tunguis-coleccion",
+      fecha: new Date().toISOString(),
+      coleccion: coleccion
+    };
+    bajarArchivo("tunguis-coleccion-respaldo.json", new Blob([JSON.stringify(resguardo)], { type: "application/json" }));
+    msj.textContent = "✓ Respaldo con " + coleccion.length + " Pokémon descargado.";
+    msj.className = "msj ok";
+    msj.hidden = false;
+  };
+
+  $("btnImportar").onclick = function () { $("archivoRespaldo").click(); };
+
+  $("archivoRespaldo").onchange = function () {
+    var msj = $("msjRespaldo");
+    msj.hidden = true;
+    var file = this.files && this.files[0];
+    this.value = "";
+    if (!file) return;
+    var lector = new FileReader();
+    lector.onload = function () {
+      var obj;
+      try { obj = JSON.parse(lector.result); } catch (e) { obj = null; }
+      if (!obj || obj.v !== 1 || obj.tipo !== "tunguis-coleccion" || !Array.isArray(obj.coleccion)) {
+        msj.textContent = "✗ No es un respaldo válido de Tunguis Games.";
+        msj.className = "msj err";
+        msj.hidden = false;
+        return;
+      }
+      var limpia = obj.coleccion.filter(function (e) {
+        return e && typeof e.s === "string" && e.s.trim() &&
+               (typeof e.g === "string") && typeof e.f === "number";
+      });
+      try {
+        localStorage.setItem("tunguis_coleccion", JSON.stringify(limpia.slice(-2000)));
+      } catch (e) {
+        msj.textContent = "✗ No se pudo guardar (memoria llena).";
+        msj.className = "msj err";
+        msj.hidden = false;
+        return;
+      }
+      pintar();
+      msj.textContent = "✓ Colección restaurada (" + limpia.length + " Pokémon).";
+      msj.className = "msj ok";
+      msj.hidden = false;
+    };
+    lector.onerror = function () {
+      msj.textContent = "✗ No se pudo leer el archivo.";
+      msj.className = "msj err";
+      msj.hidden = false;
+    };
+    lector.readAsText(file);
+  };
 
   $("btnRecibir").onclick = function () {
     var msj = $("msjRecibir");
