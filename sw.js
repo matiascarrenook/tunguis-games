@@ -1,4 +1,4 @@
-const VERSION = "tunguis-v3";
+const VERSION = "tunguis-v4";
 const SHELL = [
   "./",
   "./index.html",
@@ -44,37 +44,39 @@ self.addEventListener("fetch", (e) => {
   if (req.method !== "GET") return;
   const url = new URL(req.url);
 
+  const guardar = (res) => {
+    if (res && res.ok) {
+      const clone = res.clone();
+      caches.open(VERSION).then((c) => c.put(req, clone));
+    }
+    return res;
+  };
+
   if (url.origin !== location.origin) {
     e.respondWith(
-      caches.match(req).then((cached) => {
-        const fresh = fetch(req)
-          .then((res) => {
-            if (res && res.ok) {
-              const clone = res.clone();
-              caches.open(VERSION).then((c) => c.put(req, clone));
-            }
-            return res;
-          })
-          .catch(() => cached);
-        return cached || fresh;
-      })
+      caches.match(req).then(
+        (cached) =>
+          cached ||
+          fetch(req)
+            .then(guardar)
+            .catch(() => cached)
+      )
+    );
+    return;
+  }
+
+  if (url.pathname.includes("/roms/")) {
+    e.respondWith(
+      caches.match(req).then((c) => c || fetch(req).then(guardar))
     );
     return;
   }
 
   e.respondWith(
-    caches.match(req).then(
-      (cached) =>
-        cached ||
-        fetch(req)
-          .then((res) => {
-            if (res && res.ok) {
-              const clone = res.clone();
-              caches.open(VERSION).then((c) => c.put(req, clone));
-            }
-            return res;
-          })
-          .catch(() => caches.match("./index.html"))
-    )
+    fetch(req)
+      .then(guardar)
+      .catch(() =>
+        caches.match(req).then((c) => c || caches.match("./index.html"))
+      )
   );
 });
