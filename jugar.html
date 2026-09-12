@@ -197,6 +197,7 @@
       try { localStorage.removeItem("tunguis_pendiente_global"); } catch (e) {}
       if (window.agregarPokemon) agregarPokemon(pokemon, game.nombre);
     }
+    activarCheatsAuto();
     mostrarAviso("✓ Guardado: podés jugar este juego sin internet.");
   };
 
@@ -253,9 +254,25 @@
     const codigo = mapa[gameKey] || [];
     if (!codigo.length) { mostrarAviso("Códigos para " + pokemon.toUpperCase() + " pendientes de verificar.", true); return; }
     window.EJS_cheats = codigo;
-    mostrarAviso("🎉 ¡" + pokemon.toUpperCase() + " obtenido en " + game.nombre + "!");
+    mostrarAviso("🎉 " + pokemon.toUpperCase() + " cargado: se activa solo al iniciar la partida.");
   }
   configurarCheats();
+
+  function activarCheatsAuto() {
+    const emu = window.EJS_emulator;
+    if (!emu || !Array.isArray(emu.cheats) || !emu.cheats.length) return;
+    try {
+      emu.cheats.forEach(function (ch, idx) {
+        if (ch.checked || !ch.code) return;
+        ch.checked = true;
+        emu.cheatChanged(true, ch.code, idx);
+      });
+      if (emu.saveSettings) emu.saveSettings();
+      mostrarAviso("🎉 Cheats de " + pokemon.toUpperCase() + " activados: caminá por el pasto y atrapalo.");
+    } catch (e) {
+      mostrarAviso("⚠️ Activá los códigos manualmente en Ajustes → Cheats si no aparecen.", true);
+    }
+  }
 
   (async function () {
     await swListo();
