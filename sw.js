@@ -1,4 +1,4 @@
-const VERSION = "tunguis-v8";
+const VERSION = "tunguis-v9";
 const SHELL = [
   "./",
   "./index.html",

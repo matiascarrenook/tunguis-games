@@ -198,6 +198,9 @@
       if (window.agregarPokemon) agregarPokemon(pokemon, game.nombre);
     }
     activarCheatsAuto();
+    iniciarAutoGuardado();
+    if (params.get("fresh") === "1") borrarEstado();
+    else intentarRestaurarPartida();
     mostrarAviso("✓ Guardado: podés jugar este juego sin internet.");
   };
 
@@ -273,6 +276,62 @@
       mostrarAviso("⚠️ Activá los códigos manualmente en Ajustes → Cheats si no aparecen.", true);
     }
   }
+
+  function baseNombre() {
+    try {
+      const emu = window.EJS_emulator;
+      if (emu && typeof emu.getBaseFileName === "function") return emu.getBaseFileName();
+    } catch (e) {}
+    return (game.nombre || "juego");
+  }
+
+  function borrarEstado() {
+    try {
+      const emu = window.EJS_emulator;
+      if (emu && emu.storage && emu.storage.states && emu.storage.states.remove)
+        emu.storage.states.remove(baseNombre() + ".state");
+      mostrarAviso("🗑️ Partida borrada en este dispositivo. Empezás de cero.", true);
+    } catch (e) {}
+  }
+
+  function intentarRestaurarPartida() {
+    try {
+      const emu = window.EJS_emulator;
+      if (!emu || !emu.storage || !emu.storage.states) return;
+      emu.storage.states.get(baseNombre() + ".state").then(function (u8) {
+        if (!u8 || !emu.gameManager || !emu.gameManager.loadState) return;
+        let intentos = 0;
+        (function reintentar() {
+          try {
+            emu.gameManager.loadState(u8);
+            mostrarAviso("⏪ Continuando tu partida guardada en este dispositivo.");
+          } catch (e) {
+            if (++intentos < 6) setTimeout(reintentar, 600);
+          }
+        })();
+      }).catch(function () {});
+    } catch (e) {}
+  }
+
+  let cronGuardado = null;
+  function iniciarAutoGuardado() {
+    if (cronGuardado) return;
+    cronGuardado = setInterval(function () {
+      try {
+        const emu = window.EJS_emulator;
+        if (!emu || !emu.gameManager || !emu.storage || !emu.storage.states) return;
+        const s = emu.gameManager.getState();
+        if (s) emu.storage.states.put(baseNombre() + ".state", s);
+      } catch (e) {}
+    }, 5000);
+  }
+
+  window.addEventListener("pagehide", function () {
+    try {
+      const emu = window.EJS_emulator;
+      if (emu && emu.gameManager && emu.gameManager.saveSaveFiles) emu.gameManager.saveSaveFiles();
+    } catch (e) {}
+  });
 
   (async function () {
     await swListo();
