@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#e8382f">
+<meta name="description" content="Recibí un Pokémon en tu partida guardada.">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="favicon.svg">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<title>Distribuidor Pokémon</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: "Trebuchet MS", Verdana, system-ui, sans-serif;
+    color: #1a1a2e;
+    min-height: 100vh;
+    background:
+      radial-gradient(circle at 14% 16%, rgba(255,255,255,.6), transparent 38%),
+      radial-gradient(circle at 86% 84%, rgba(255,255,255,.4), transparent 42%),
+      linear-gradient(160deg, #ffd9c2 0%, #ffe9e0 35%, #cfe2ff 100%);
+    background-attachment: fixed;
+    padding: 16px 12px max(24px, env(safe-area-inset-bottom));
+  }
+  .wrap { max-width: 560px; margin: 0 auto; width: 100%; }
+  .card {
+    background: #fff;
+    border: 3px solid #1a1a2e;
+    border-radius: 18px;
+    padding: 20px 16px;
+    box-shadow: 0 7px 0 rgba(26,26,46,.16);
+    text-align: center;
+  }
+  h1 { text-transform: uppercase; letter-spacing: 1.5px; font-size: 1.3rem; }
+  .monstruo { font-size: 3rem; margin: 10px 0 4px; }
+  p.desc { color: #6a6a80; font-size: .95rem; line-height: 1.5; }
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+    margin-top: 16px;
+  }
+  .carta {
+    background: #fff;
+    border: 3px solid #1a1a2e;
+    border-radius: 14px;
+    padding: 12px;
+    text-align: center;
+    cursor: pointer;
+    text-decoration: none;
+    color: inherit;
+    box-shadow: 0 5px 0 rgba(26,26,46,.18);
+    -webkit-tap-highlight-color: transparent;
+  }
+  .carta:active { transform: translateY(3px); box-shadow: 0 2px 0 rgba(26,26,46,.18); }
+  .carta .mini {
+    width: 34px; height: 34px;
+    border-radius: 50%;
+    margin: 0 auto 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.1rem;
+    color: #fff;
+    font-weight: 900;
+    border: 2px solid rgba(0,0,0,.3);
+  }
+  .carta b { display: block; font-size: .95rem; line-height: 1.25; }
+  .carta small { color: #9a9aa8; font-weight: 700; }
+  .btn {
+    display: inline-block;
+    margin-top: 18px;
+    background: #e8382f;
+    color: #fff;
+    font-weight: 800;
+    text-decoration: none;
+    border-radius: 10px;
+    padding: 11px 20px;
+    box-shadow: 0 4px 0 #b81f26;
+  }
+  .sin { margin-top: 18px; }
+  a.back {
+    display: block;
+    margin-bottom: 12px;
+    text-decoration: none;
+    color: #7a4900;
+    font-weight: 800;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <a class="back" href="index.html">← Juegos</a>
+  <div class="card" id="contenido"></div>
+</div>
+
+<script src="config.js"></script>
+<script>
+(function () {
+  const params = new URLSearchParams(location.search);
+  const pokemon = (params.get("pokemon") || "mew").trim().toLowerCase();
+  const contenido = document.getElementById("contenido");
+
+  const disponibles = [];
+  Object.keys(GAMES).forEach(function (k) {
+    const g = GAMES[k];
+    try {
+      if (localStorage.getItem("tunguis_juego_" + g.gameID)) {
+        disponibles.push({ key: k, game: g });
+      }
+    } catch (e) {}
+  });
+
+  let html =
+    '<h1>Distribuidor</h1>' +
+    '<div class="monstruo">🎁</div>' +
+    '<p class="desc">Este llavero entrega <b>' + pokemon.toUpperCase() + '</b>.<br>Elegí la partida donde querés recibirlo.</p>';
+
+  if (disponibles.length) {
+    html += '<div class="grid">';
+    disponibles.forEach(function (d) {
+      html +=
+        '<a class="carta" href="jugar.html?key=' + d.game.token + '&pokemon=' + pokemon + '">' +
+          '<div class="mini" style="background:' + d.game.color + '">' + d.game.nombre.charAt(0) + '</div>' +
+          '<b>' + d.game.nombre + '</b>' +
+          '<small>' + d.game.detalle + '</small>' +
+        '</a>';
+    });
+    html += '</div>';
+  } else {
+    html +=
+      '<p class="sin"><b>No se detectaron partidas guardadas.</b><br>' +
+      'Jugá una vez al menos con tu llavero de cartucho y volvé a intentar.</p>' +
+      '<a class="btn" href="index.html">Ver cartuchos</a>';
+  }
+
+  contenido.innerHTML = html;
+})();
+</script>
+<script>
+  if ("serviceWorker" in navigator) {
+    window.addEventListener("load", function () {
+      navigator.serviceWorker.register("sw.js").catch(function () {});
+    });
+  }
+</script>
+</body>
+</html>

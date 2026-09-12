@@ -6,6 +6,10 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#e8382f">
+<meta name="description" content="Jugá Pokémon GBA en tu celular con llaveros NFC. Partidas guardadas en tu dispositivo.">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="favicon.svg">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
 <title>Pokémon · Llaveros GBA</title>
 <style>
   :root {
@@ -323,6 +327,12 @@
   <h2 class="titulo-seccion">Cartuchos</h2>
   <div class="grid" id="leyenda"></div>
 
+  <h2 class="titulo-seccion">Llaveros Pokémon</h2>
+  <div class="grid" id="pokemons"></div>
+  <div class="como" id="sindatos">
+    <p id="sinPokemons">Sin Pokémon disponibles todavía.</p>
+  </div>
+
   <div class="como">
     <h3>¿Cómo funciona?</h3>
     Cada llavero trae un tag NFC con una llave única grabada. Al acercarlo al teléfono se
@@ -334,6 +344,7 @@
 </div>
 
 <script src="config.js"></script>
+<script src="cheats.js"></script>
 <script>
 (function () {
   const input = document.getElementById("llave");
@@ -347,6 +358,28 @@
 
   boton.addEventListener("click", abrir);
   input.addEventListener("keydown", function (e) { if (e.key === "Enter") abrir(); });
+
+  const pokemons = document.getElementById("pokemons");
+  if (window.POKEMON_CHEATS && Object.keys(window.POKEMON_CHEATS).length) {
+    document.getElementById("sinPokemons").textContent = "Acercá un llavero Pokémon para recibir ese Pokémon en tu partida.";
+    Object.keys(window.POKEMON_CHEATS).forEach(function (poke) {
+      const carta = document.createElement("a");
+      carta.className = "carta";
+      carta.style.cssText = "text-decoration:none;color:inherit;display:block";
+      carta.href = "distribuir.html?pokemon=" + poke;
+      carta.innerHTML =
+        '<div class="cassette" style="--color:#e8382f">' +
+          '<div class="cuerpo"><div class="etiqueta">' +
+            '<span style="font-size:2rem">🎁</span>' +
+          '</div></div>' +
+        '</div>' +
+        '<div class="nombre-juego">' + poke.toUpperCase() + '</div>' +
+        '<div class="detalle">Recibí este Pokémon</div>';
+      pokemons.appendChild(carta);
+    });
+  } else {
+    document.getElementById("sindatos").hidden = true;
+  }
 
   const leyenda = document.getElementById("leyenda");
   Object.keys(GAMES).forEach(function (key) {
@@ -364,6 +397,13 @@
     leyenda.appendChild(fila);
   });
 })();
+</script>
+<script>
+  if ("serviceWorker" in navigator) {
+    window.addEventListener("load", function () {
+      navigator.serviceWorker.register("sw.js").catch(function () {});
+    });
+  }
 </script>
 </body>
 </html>

@@ -7,6 +7,10 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#0d0d14">
+<meta name="description" content="Emulador GBA Pokémon con soporte offline y llaveros.">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="favicon.svg">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
 <title>Pokémon · Jugando</title>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -30,14 +34,14 @@
     flex: none;
     min-height: 46px;
   }
-  header a {
+  header a.back {
     color: #9a9aac;
     text-decoration: none;
     font-size: .9rem;
     flex: none;
     -webkit-tap-highlight-color: transparent;
   }
-  header a:active { color: #fff; }
+  header a.back:active { color: #fff; }
   header .titulo {
     display: flex;
     align-items: center;
@@ -47,6 +51,7 @@
     overflow: hidden;
     text-overflow: ellipsis;
     min-width: 0;
+    flex: 1;
   }
   header .dot { width: 12px; height: 12px; border-radius: 50%; flex: none; }
   header .logoWrap {
@@ -61,11 +66,36 @@
     flex: none;
     box-shadow: 0 2px 0 rgba(0,0,0,.4);
   }
-  header .logoWrap .logo {
-    height: 100%;
-    max-width: 30vw;
-    object-fit: contain;
+  header .logoWrap .logo { height: 100%; max-width: 30vw; object-fit: contain; }
+  #btnDescarga {
+    flex: none;
+    background: #e8382f;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 7px 12px;
+    font-size: .85rem;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 2px 0 rgba(0,0,0,.4);
+    display: none;
+    -webkit-tap-highlight-color: transparent;
   }
+  #btnDescarga:active { filter: brightness(1.2); }
+  .aviso {
+    margin: 8px auto -8px;
+    max-width: 640px;
+    width: calc(100% - 16px);
+    padding: 9px 12px;
+    border-radius: 8px;
+    font-size: .9rem;
+    text-align: center;
+    font-weight: 600;
+    background: #143223;
+    border: 1px solid #227a4b;
+    color: #7df0b0;
+  }
+  .aviso.error { background: #3a1616; border-color: #a03030; color: #ff9d9d; }
   .contenedor {
     flex: 1;
     display: flex;
@@ -74,9 +104,7 @@
     padding: 8px;
     min-height: 0;
   }
-  @media (max-width: 520px) {
-    .contenedor { padding: 0; }
-  }
+  @media (max-width: 520px) { .contenedor { padding: 0; } }
   .ejs_controls { z-index: 10 !important; }
   #noJuego {
     margin: auto;
@@ -97,10 +125,12 @@
 </head>
 <body>
 <header>
-  <a href="index.html">← Juegos</a>
+  <a class="back" href="index.html">← Juegos</a>
   <span class="logoWrap" id="logoWrap" hidden><img class="logo" id="logo" alt=""></span>
   <div class="titulo"><span class="dot" id="dot"></span><span id="titulo">Cargando…</span></div>
+  <button id="btnDescarga">⬇ Descargar</button>
 </header>
+<div class="aviso" id="aviso" hidden></div>
 <div class="contenedor">
   <div id="game"></div>
   <div id="noJuego" hidden>
@@ -114,10 +144,12 @@
 (function () {
   const params = new URLSearchParams(location.search);
   const key = (params.get("key") || "").trim().toLowerCase();
+  const pokemon = (params.get("pokemon") || "").trim().toLowerCase();
   let game = null;
+  let gameKey = "";
 
   for (const k of Object.keys(GAMES)) {
-    if (GAMES[k].token === key) { game = GAMES[k]; break; }
+    if (GAMES[k].token === key) { game = GAMES[k]; gameKey = k; break; }
   }
 
   if (!game) {
@@ -126,31 +158,101 @@
     return;
   }
 
-  document.getElementById("titulo").textContent = game.nombre;
-  document.getElementById("dot").style.background = game.color;
-  document.getElementById("logoWrap").hidden = false;
-  document.getElementById("logo").src = "img/" + game.img;
+  const $ = (id) => document.getElementById(id);
+  $("titulo").textContent = game.nombre;
+  $("dot").style.background = game.color;
+  $("logoWrap").hidden = false;
+  $("logo").src = "img/" + game.img;
   document.querySelector("meta[name=theme-color]").setAttribute("content", game.color);
   document.documentElement.style.setProperty("--color", game.color);
 
   window.EJS_player = "#game";
   window.EJS_core = "gba";
-  window.EJS_gameUrl = "roms/" + encodeURIComponent(game.file);
   window.EJS_gameName = game.nombre;
   window.EJS_gameID = game.gameID;
   window.EJS_pathtodata = "https://cdn.emulatorjs.org/stable/data/";
   window.EJS_startOnLoaded = true;
   window.EJS_theme = "dark";
   window.EJS_fixedSaveInterval = 7000;
+  window.EJS_cacheConfig = { enabled: false };
   window.EJS_defaultOptions = {
     "save-state-location": "browser",
     "save-state-slot": 1
   };
+  window.EJS_onGameStart = function () {
+    try { localStorage.setItem("tunguis_juego_" + game.gameID, game.nombre); } catch (e) {}
+  };
 
-  const s = document.createElement("script");
-  s.src = "https://cdn.emulatorjs.org/stable/data/loader.js";
-  document.head.appendChild(s);
+  const aviso = $("aviso");
+
+  function mostrarAviso(msg, error) {
+    aviso.textContent = msg;
+    aviso.classList.toggle("error", !!error);
+    aviso.hidden = false;
+  }
+
+  function tokenABytes(token) {
+    const b = new Uint8Array(token.length / 2);
+    for (let i = 0; i < b.length; i++) b[i] = parseInt(token.substr(i * 2, 2), 16);
+    return b;
+  }
+
+  async function descifrar() {
+    const res = await fetch("roms/" + encodeURIComponent(game.file));
+    if (!res.ok) throw new Error("No se pudo descargar la ROM cifrada");
+    const buf = await res.arrayBuffer();
+    const iv = new Uint8Array(buf.slice(0, 12));
+    const data = new Uint8Array(buf.slice(12));
+    const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(game.token));
+    const key = await crypto.subtle.importKey("raw", digest, "AES-GCM", false, ["decrypt"]);
+    const claro = await crypto.subtle.decrypt({ name: "AES-GCM", iv }, key, data);
+    return new Uint8Array(claro);
+  }
+
+  function configurarCheats() {
+    if (!pokemon || !window.POKEMON_CHEATS) return;
+    const mapa = window.POKEMON_CHEATS[pokemon];
+    if (!mapa) { mostrarAviso("Este Pokémon aún no tiene llavero configurado.", true); return; }
+    const codigo = mapa[gameKey] || [];
+    if (!codigo.length) { mostrarAviso("Códigos para " + pokemon.toUpperCase() + " pendientes de verificar.", true); return; }
+    window.EJS_cheats = codigo;
+    mostrarAviso("🎉 ¡" + pokemon.toUpperCase() + " obtenido en " + game.nombre + "!");
+  }
+  configurarCheats();
+
+  (async function () {
+    try {
+      const claro = await descifrar();
+      const blob = new Blob([claro], { type: "application/octet-stream" });
+      window.EJS_gameUrl = URL.createObjectURL(blob);
+
+      const btn = $("btnDescarga");
+      btn.style.display = "inline-block";
+      btn.onclick = function () {
+        const a = document.createElement("a");
+        a.href = URL.createObjectURL(new Blob([claro]));
+        a.download = game.descarga || (game.file.replace(/\.enc$/, ""));
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+      };
+
+      const s = document.createElement("script");
+      s.src = "https://cdn.emulatorjs.org/stable/data/loader.js";
+      document.head.appendChild(s);
+    } catch (err) {
+      mostrarAviso("No se pudo abrir el juego: " + err.message, true);
+      $("titulo").textContent = "Error";
+    }
+  })();
 })();
+</script>
+<script>
+  if ("serviceWorker" in navigator) {
+    window.addEventListener("load", function () {
+      navigator.serviceWorker.register("sw.js").catch(function () {});
+    });
+  }
 </script>
 </body>
 </html>
