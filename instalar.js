@@ -1,6 +1,14 @@
 (function () {
   var btn = document.getElementById("btnInstalar");
   if (!btn) return;
+  var msj = document.getElementById("instalarMsj");
+
+  function aviso(texto) {
+    if (msj) {
+      msj.textContent = texto;
+      msj.hidden = false;
+    }
+  }
 
   var ua = navigator.userAgent.toLowerCase();
   var iOS =
@@ -10,9 +18,10 @@
     window.matchMedia && matchMedia("(display-mode: standalone)").matches;
 
   function instalada() {
-    btn.textContent = "✓ Tunguis Games instalada";
+    btn.textContent = "✓ Instalada";
     btn.disabled = true;
     btn.classList.add("ok");
+    if (msj) msj.hidden = true;
   }
 
   window.addEventListener("appinstalled", instalada);
@@ -23,13 +32,11 @@
   }
 
   btn.style.display = "inline-block";
-  btn.textContent = iOS ? "Instalar en iPhone" : "Instalar app";
 
   var deferred = null;
   window.addEventListener("beforeinstallprompt", function (e) {
     e.preventDefault();
     deferred = e;
-    btn.textContent = "Instalar Tunguis Games";
     btn.onclick = function () {
       deferred.prompt();
       deferred.userChoice.then(function (c) {
@@ -40,6 +47,14 @@
   });
 
   btn.onclick = function () {
+    if (deferred) {
+      deferred.prompt();
+      deferred.userChoice.then(function (c) {
+        if (c.outcome === "accepted") instalada();
+        deferred = null;
+      });
+      return;
+    }
     if (iOS) {
       var url = location.href.split("?")[0];
       if (navigator.share) {
@@ -51,10 +66,10 @@
           })
           .catch(function () {});
       } else {
-        btn.textContent = "Safari → Compartir → Añadir a pantalla de inicio";
+        aviso("Safari → Compartir → «Añadir a pantalla de inicio»");
       }
       return;
     }
-    btn.textContent = "Menú (⋮) → 'Instalar app' o 'Añadir a pantalla de inicio'";
+    aviso("Si no aparece la instalación, usá el menú (⋮) → «Instalar app» o «Añadir a pantalla de inicio».");
   };
 })();

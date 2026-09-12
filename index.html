@@ -208,6 +208,14 @@
     letter-spacing: 1px;
   }
   .instalar .txt p { color: #b8b8cc; font-size: .82rem; line-height: 1.4; margin-top: 3px; }
+  .instalar .msj {
+    display: block;
+    margin-top: 6px;
+    font-size: .8rem;
+    font-weight: 700;
+    line-height: 1.35;
+    color: #ffd84d;
+  }
   #btnInstalar {
     flex: none;
     background: linear-gradient(180deg, #ffd84d, #ffb300);
@@ -226,6 +234,12 @@
   }
   #btnInstalar:active { transform: translateY(2px); box-shadow: 0 2px 0 #d1a000; }
   #btnInstalar.ok { background: linear-gradient(180deg, #4ade80, #22a55b); color: #07301c; box-shadow: 0 4px 0 #147a43; }
+
+  @media (max-width: 380px) {
+    .instalar { flex-direction: column; text-align: center; gap: 10px; }
+    .instalar .miniLogo { width: 64px; height: 64px; }
+    #btnInstalar { width: 100%; max-width: 240px; }
+  }
 
   .titulo-seccion {
     display: flex;
@@ -246,6 +260,13 @@
     border-radius: 3px;
     background: linear-gradient(90deg, transparent, var(--red), transparent);
   }
+  .sub-seccion {
+    text-align: center;
+    font-size: clamp(.75rem, 3vw, .85rem);
+    color: #6a6a80;
+    font-weight: 700;
+    margin: -6px 0 14px;
+  }
 
   .grid {
     display: grid;
@@ -262,6 +283,35 @@
     transition: transform .15s ease;
   }
   .carta:hover { transform: translateY(-4px) rotate(-1deg); }
+
+  .carta.bloqueada .cuerpo { filter: saturate(0); opacity: .72; }
+  .carta.bloqueada .cuerpo::before {
+    content: "🔒";
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: clamp(1.6rem, 7vw, 2.4rem);
+    text-shadow: 0 3px 8px rgba(0,0,0,.6);
+    z-index: 2;
+    background: rgba(22,22,38,.28);
+    border-radius: clamp(10px,3vw,14px);
+  }
+  .carta .detalle.bloque { color: #c4553f; font-weight: 800; }
+  .carta .play {
+    display: inline-block;
+    margin-top: 9px;
+    background: var(--yellow);
+    color: #7a4900;
+    font-weight: 900;
+    font-size: .76rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    padding: 6px 12px;
+    border-radius: 999px;
+    box-shadow: 0 3px 0 #d1a000;
+  }
 
   .cassette .cuerpo {
     height: clamp(92px, 26vw, 128px);
@@ -370,6 +420,7 @@
     <div class="txt">
       <b>App Tunguis Games</b>
       <p>Instalá la app y jugá sin internet. El emulador y cada juego quedan guardados en tu teléfono.</p>
+      <span class="msj" id="instalarMsj" hidden></span>
     </div>
     <button id="btnInstalar">Instalar</button>
   </div>
@@ -381,6 +432,7 @@
   </section>
 
   <h2 class="titulo-seccion">Cartuchos</h2>
+  <p class="sub-seccion">Con candado 🔒 falta tu llave. Sin candado = tocá para jugar.</p>
   <div class="grid" id="leyenda"></div>
 
   <h2 class="titulo-seccion">Llaveros Pokémon</h2>
@@ -438,18 +490,40 @@
   }
 
   const leyenda = document.getElementById("leyenda");
+  const claveActual = (new URLSearchParams(location.search).get("key") || "").trim().toLowerCase();
+
+  function estaDisponible(g) {
+    if (g.token === claveActual) return true;
+    try { return !!localStorage.getItem("tunguis_juego_" + g.gameID); } catch (e) { return false; }
+  }
+
   Object.keys(GAMES).forEach(function (key) {
     const g = GAMES[key];
-    const fila = document.createElement("div");
-    fila.className = "carta";
-    fila.innerHTML =
+    const cuerpo =
       '<div class="cassette" style="--color:' + g.color + '">' +
         '<div class="cuerpo"><div class="etiqueta">' +
           '<img src="img/' + g.img + '" alt="' + g.nombre + '" loading="lazy">' +
         '</div></div>' +
-      '</div>' +
-      '<div class="nombre-juego">' + g.nombre + '</div>' +
-      '<div class="detalle">' + g.detalle + '</div>';
+      '</div>';
+    let fila;
+    if (estaDisponible(g)) {
+      fila = document.createElement("a");
+      fila.href = "jugar.html?key=" + g.token;
+      fila.className = "carta";
+      fila.style.cssText = "text-decoration:none;color:inherit;display:block";
+      fila.innerHTML =
+        cuerpo +
+        '<div class="nombre-juego">' + g.nombre + '</div>' +
+        '<div class="detalle">' + g.detalle + '</div>' +
+        '<span class="play">Jugar</span>';
+    } else {
+      fila = document.createElement("div");
+      fila.className = "carta bloqueada";
+      fila.innerHTML =
+        cuerpo +
+        '<div class="nombre-juego">' + g.nombre + '</div>' +
+        '<div class="detalle bloque">🔒 Bloqueado · acercá tu llavero</div>';
+    }
     leyenda.appendChild(fila);
   });
 })();
