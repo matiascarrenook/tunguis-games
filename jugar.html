@@ -294,6 +294,17 @@
     "save-state-location": "browser",
     "save-state-slot": 1
   };
+  window.EJS_VirtualGamepadSettings = [
+    { type: "dpad", location: "left", left: "50%", right: "50%", joystickInput: false, inputValues: [4, 5, 6, 7] },
+    { type: "button", text: "L", id: "l", location: "left", left: 3, top: -90, bold: true, input_value: 10 },
+    { type: "button", text: "R", id: "r", location: "right", right: 3, top: -90, bold: true, input_value: 11 },
+    { type: "button", text: "B", id: "b", location: "right", left: 10, top: 70, bold: true, input_value: 0 },
+    { type: "button", text: "A", id: "a", location: "right", left: 81, top: 40, bold: true, input_value: 8 },
+    { type: "button", text: "Select", id: "select", location: "center", left: -5, top: 120, fontSize: 15, block: true, input_value: 2 },
+    { type: "button", text: "Start", id: "start", location: "center", left: 60, top: 120, fontSize: 15, block: true, input_value: 3 },
+    { type: "button", text: "Rápido", id: "speed_fast", location: "center", left: -35, top: -160, fontSize: 15, block: true, input_value: 27 },
+    { type: "button", text: "Lento", id: "speed_slow", location: "center", left: 95, top: -160, fontSize: 15, block: true, input_value: 29 }
+  ];
   window.EJS_onGameStart = function () {
     try { localStorage.setItem("tunguis_juego_" + game.gameID, game.nombre); } catch (e) {}
     try { localStorage.setItem("tunguis_offline_" + game.gameID, game.nombre); } catch (e) {}
