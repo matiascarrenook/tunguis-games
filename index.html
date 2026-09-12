@@ -507,6 +507,9 @@
       '</div>';
     let fila;
     if (estaDisponible(g)) {
+      const offline = (function () {
+        try { return !!localStorage.getItem("tunguis_offline_" + g.gameID); } catch (e) { return false; }
+      })();
       fila = document.createElement("a");
       fila.href = "jugar.html?key=" + g.token;
       fila.className = "carta";
@@ -515,7 +518,7 @@
         cuerpo +
         '<div class="nombre-juego">' + g.nombre + '</div>' +
         '<div class="detalle">' + g.detalle + '</div>' +
-        '<span class="play">Jugar</span>';
+        '<span class="play">' + (offline ? "Jugar sin internet ✓" : "Jugar") + '</span>';
     } else {
       fila = document.createElement("div");
       fila.className = "carta bloqueada";

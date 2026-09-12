@@ -1,4 +1,4 @@
-const VERSION = "tunguis-v4";
+const VERSION = "tunguis-v5";
 const SHELL = [
   "./",
   "./index.html",
@@ -36,6 +36,24 @@ self.addEventListener("activate", (e) => {
         Promise.all(keys.filter((k) => k !== VERSION).map((k) => caches.delete(k)))
       )
       .then(() => self.clients.claim())
+  );
+});
+
+self.addEventListener("message", (e) => {
+  const d = e.data;
+  if (!d || d.action !== "cacheUrl") return;
+  e.waitUntil(
+    caches.open(VERSION).then((c) =>
+      caches.match(d.url).then((yaCacheado) => {
+        if (yaCacheado) return;
+        const cross = new URL(d.url, location.href).origin !== location.origin;
+        return fetch(d.url, { mode: cross ? "no-cors" : "cors", credentials: "same-origin" })
+          .then((res) => {
+            if (res && (res.ok || res.type === "opaque")) c.put(d.url, res);
+          })
+          .catch(() => {});
+      })
+    )
   );
 });
 

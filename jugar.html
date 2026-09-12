@@ -183,6 +183,8 @@
   };
   window.EJS_onGameStart = function () {
     try { localStorage.setItem("tunguis_juego_" + game.gameID, game.nombre); } catch (e) {}
+    try { localStorage.setItem("tunguis_offline_" + game.gameID, game.nombre); } catch (e) {}
+    mostrarAviso("✓ Guardado: podés jugar este juego sin internet.");
   };
 
   const aviso = $("aviso");
@@ -201,8 +203,21 @@
 
   function swListo() {
     if (!("serviceWorker" in navigator)) return Promise.resolve();
+    try { navigator.serviceWorker.register("sw.js").catch(function () {}); } catch (e) {}
     return navigator.serviceWorker.ready
-      .then(function () { return new Promise(function (r) { setTimeout(r, 300); }); })
+      .then(function () {
+        if (navigator.serviceWorker.controller) {
+          navigator.serviceWorker.controller.postMessage({
+            action: "cacheUrl",
+            url: "roms/" + encodeURIComponent(game.file)
+          });
+          navigator.serviceWorker.controller.postMessage({
+            action: "cacheUrl",
+            url: "https://cdn.emulatorjs.org/stable/data/loader.js"
+          });
+        }
+        return new Promise(function (r) { setTimeout(r, 300); });
+      })
       .catch(function () {});
   }
 
